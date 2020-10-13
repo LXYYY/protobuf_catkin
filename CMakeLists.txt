@@ -41,8 +41,9 @@ if(USE_SYSTEM_PROTOBUF STREQUAL "ON")
   message(STATUS "Using system protobuf.")
 
   find_package(Protobuf REQUIRED)
-  set(PREFERRED_PROTOC_EXECUTABLE ${Protobuf_PROTOC_EXECUTABLE})
-
+  set(PREFERRED_PROTOC_EXECUTABLE /usr/bin/protoc)
+  message("${PREFERRED_PROTOC_EXECUTABLE}")
+  message("${Protobuf_INCLUDE_DIRS}")
   cs_install()
   cs_export(INCLUDE_DIRS ${Protobuf_INCLUDE_DIRS}
             LIBRARIES ${Protobuf_LIBRARIES}
@@ -66,15 +67,13 @@ elseif(USE_SYSTEM_PROTOBUF STREQUAL "OFF")
   file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
 
   ExternalProject_Add(protobuf_src
-    URL https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz
+    URL http://192.168.0.17:8000/Libraries/packages/protobuf-2.6.1.tar.gz
     UPDATE_COMMAND ""
     PATCH_COMMAND patch -p0 < ${CMAKE_SOURCE_DIR}/unused_parameter_warnings.patch &&
                   patch -p0 < ${CMAKE_SOURCE_DIR}/unused_parameter_warnings_wire_format.patch
     CONFIGURE_COMMAND cd ../protobuf_src && ./autogen.sh && ./configure --with-pic --prefix=${CATKIN_DEVEL_PREFIX}
-    BUILD_COMMAND cd ../protobuf_src && make -j8 && cd python && python setup.py build --build-purelib build
-    INSTALL_COMMAND cd ../protobuf_src && make install -j8 &&
-                    cd python && python setup.py install --root ${CATKIN_DEVEL_PREFIX} --install-lib ${CATKIN_GLOBAL_PYTHON_DESTINATION} &&
-                    cp build/google/__init__.py ${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_PYTHON_DESTINATION}/google
+    BUILD_COMMAND cd ../protobuf_src && make -j8
+    INSTALL_COMMAND cd ../protobuf_src && make install -j8
   )
 
   install(DIRECTORY ${CATKIN_DEVEL_PREFIX}/include/google/protobuf
